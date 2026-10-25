@@ -1,0 +1,19 @@
+# Local PostgreSQL for development. Credentials are dev placeholders, not secrets.
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: devflow
+      POSTGRES_PASSWORD: devflow_local
+      POSTGRES_DB: devflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - devflow-db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devflow -d devflow"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  devflow-db:

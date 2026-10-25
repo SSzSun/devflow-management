@@ -1,0 +1,17 @@
+{
+  "name": "devflow",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev": "bun run --filter @devflow/api --filter @devflow/web dev",
+    "dev:api": "bun run --cwd apps/api start:dev",
+    "dev:web": "bun run --cwd apps/web dev",
+    "build": "bun run --cwd packages/shared build && bun run --cwd apps/api build && bun run --cwd apps/web build",
+    "test": "bun test packages/shared && bun run --cwd apps/api test",
+    "typecheck": "bun run --cwd packages/shared typecheck && bun run --cwd apps/api typecheck && bun run --cwd apps/web typecheck"
+  }
+}

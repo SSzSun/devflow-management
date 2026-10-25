@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+apps/api/src/generated/
+.next/
+*.tsbuildinfo
+
+# Env — never commit real values
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# OS
+Thumbs.db
+.DS_Store
