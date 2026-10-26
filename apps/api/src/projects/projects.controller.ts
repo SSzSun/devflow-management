@@ -43,8 +43,9 @@ export class ProjectsController {
 
   @Get("projects/:projectId")
   @UseGuards(ProjectAccessGuard)
-  findOne(@Param("projectId") projectId: string) {
-    return this.projects.findOne(projectId);
+  async findOne(@Req() req: ProjectRequest, @Param("projectId") projectId: string) {
+    // role lets the UI hide actions the API would reject anyway.
+    return { ...(await this.projects.findOne(projectId)), role: req.projectRole };
   }
 
   @Patch("projects/:projectId")

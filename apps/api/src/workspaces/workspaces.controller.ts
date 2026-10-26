@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard, type AuthedRequest } from "../auth/jwt-auth.guard";
-import { requireUserId } from "../common/request-context";
+import { requireUserId, requireWorkspace } from "../common/request-context";
 import { Roles } from "../common/roles.decorator";
 import { WorkspaceGuard } from "./workspace.guard";
+import type { WorkspaceRequest } from "../common/authed-request";
 import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./dto/create-workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update-workspace.dto";
@@ -29,8 +30,10 @@ export class WorkspacesController {
   // WorkspaceGuard resolves :workspaceId → 404 for non-members before these run.
   @Get(":workspaceId")
   @UseGuards(WorkspaceGuard)
-  findOne(@Param("workspaceId") workspaceId: string) {
-    return this.workspaces.findForMember(workspaceId);
+  async findOne(@Req() req: WorkspaceRequest, @Param("workspaceId") workspaceId: string) {
+    // role lets the UI hide actions the API would reject anyway.
+    const { role } = requireWorkspace(req);
+    return { ...(await this.workspaces.findForMember(workspaceId)), role };
   }
 
   @Patch(":workspaceId")
