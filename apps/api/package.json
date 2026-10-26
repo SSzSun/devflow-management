@@ -8,7 +8,8 @@
     "start:dev": "nest start --watch",
     "start": "nest start",
     "test": "bun test test",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "seed": "bun prisma/seed.ts"
   },
   "dependencies": {
     "@devflow/shared": "workspace:*",
