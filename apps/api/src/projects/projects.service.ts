@@ -12,6 +12,7 @@ const PROJECT_SUMMARY = {
   key: true,
   description: true,
   workspaceId: true,
+  archivedAt: true,
   createdAt: true,
   updatedAt: true,
   _count: { select: { issues: true, members: true } },
@@ -52,15 +53,17 @@ export class ProjectsService {
 
   /**
    * Projects the caller may see: everything, for workspace OWNER/ADMIN; only
-   * explicit project memberships, for workspace MEMBER.
+   * explicit project memberships, for workspace MEMBER. Archived projects are
+   * hidden unless explicitly asked for.
    */
-  listForWorkspace(workspaceId: string, userId: string, isWorkspaceAdmin: boolean) {
+  listForWorkspace(workspaceId: string, userId: string, isWorkspaceAdmin: boolean, includeArchived: boolean) {
     return this.prisma.project.findMany({
       where: {
         workspaceId,
+        ...(includeArchived ? {} : { archivedAt: null }),
         ...(isWorkspaceAdmin ? {} : { members: { some: { userId } } }),
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ archivedAt: "asc" }, { createdAt: "asc" }],
       select: PROJECT_SUMMARY,
     });
   }
@@ -82,10 +85,25 @@ export class ProjectsService {
     });
   }
 
-  async remove(projectId: string) {
-    // Cascades to issues, labels and counters; issue activity history goes with them.
-    await this.prisma.project.delete({ where: { id: projectId } });
-    return { success: true };
+  /**
+   * Archive, not delete. A hard delete would cascade away every issue, comment
+   * and activity record in the project — irrecoverable history loss.
+   */
+  async archive(projectId: string) {
+    const project = await this.prisma.project.update({
+      where: { id: projectId },
+      data: { archivedAt: new Date() },
+      select: PROJECT_SUMMARY,
+    });
+    return project;
+  }
+
+  async restore(projectId: string) {
+    return this.prisma.project.update({
+      where: { id: projectId },
+      data: { archivedAt: null },
+      select: PROJECT_SUMMARY,
+    });
   }
 
   async listMembers(projectId: string) {

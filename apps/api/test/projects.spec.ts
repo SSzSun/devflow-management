@@ -196,12 +196,39 @@ describe("projects (integration)", () => {
     await viewer.request("get", `/api/v1/projects/${projectId}`).expect(404);
   });
 
-  it("cascades a project delete to its members and counter", async () => {
+  it("archives instead of deleting, preserving issues and members", async () => {
     await owner.request("delete", `/api/v1/projects/${projectId}`).expect(200);
-    await member.request("get", `/api/v1/projects/${projectId}`).expect(404);
+
+    // The row is still there, only flagged.
+    const row = await prisma.project.findUniqueOrThrow({ where: { id: projectId } });
+    expect(row.archivedAt).not.toBeNull();
+    expect(await prisma.projectCounter.findUnique({ where: { projectId } })).not.toBeNull();
+    expect(await prisma.projectMember.count({ where: { projectId } })).toBeGreaterThan(0);
+
+    // Hidden from the default list, still reachable by id for its history.
     const list = await member.request("get", `/api/v1/workspaces/${workspaceId}/projects`).expect(200);
     expect((list.body as unknown[]).length).toBe(0);
-    expect(await prisma.projectCounter.findUnique({ where: { projectId } })).toBeNull();
-    expect(await prisma.projectMember.count({ where: { projectId } })).toBe(0);
+    await member.request("get", `/api/v1/projects/${projectId}`).expect(200);
+
+    // Opted in explicitly, it comes back.
+    const all = await member
+      .request("get", `/api/v1/workspaces/${workspaceId}/projects?includeArchived=true`)
+      .expect(200);
+    expect((all.body as unknown[]).length).toBe(1);
+  });
+
+  it("restores an archived project", async () => {
+    await owner.request("post", `/api/v1/projects/${projectId}/restore`).expect(200);
+    const list = await member.request("get", `/api/v1/workspaces/${workspaceId}/projects`).expect(200);
+    expect((list.body as unknown[]).length).toBe(1);
+  });
+
+  it("keeps the archived project's key reserved", async () => {
+    // Reusing it would make old issue keys like MAIN-42 mean a different project.
+    await owner.request("delete", `/api/v1/projects/${projectId}`).expect(200);
+    await owner
+      .request("post", `/api/v1/workspaces/${workspaceId}/projects`)
+      .send({ name: "Reuse", key: "MAIN" })
+      .expect(409);
   });
 });

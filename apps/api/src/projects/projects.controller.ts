@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { hasWorkspaceRole } from "@devflow/shared";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
@@ -22,10 +22,15 @@ export class ProjectsController {
 
   @Get("workspaces/:workspaceId/projects")
   @UseGuards(WorkspaceGuard)
-  list(@Req() req: WorkspaceRequest) {
+  list(@Req() req: WorkspaceRequest, @Query("includeArchived") includeArchived?: string) {
     const { workspaceId, role } = requireWorkspace(req);
     // Workspace admins see all projects; members see only theirs.
-    return this.projects.listForWorkspace(workspaceId, requireUserId(req), hasWorkspaceRole(role, "ADMIN"));
+    return this.projects.listForWorkspace(
+      workspaceId,
+      requireUserId(req),
+      hasWorkspaceRole(role, "ADMIN"),
+      includeArchived === "true",
+    );
   }
 
   @Post("workspaces/:workspaceId/projects")
@@ -49,12 +54,21 @@ export class ProjectsController {
     return this.projects.update(projectId, dto);
   }
 
+  /** Archives the project. DELETE never destroys issues or activity history. */
   @Delete("projects/:projectId")
   @HttpCode(200)
   @UseGuards(ProjectAccessGuard)
   @ProjectRoles("ADMIN")
-  remove(@Param("projectId") projectId: string) {
-    return this.projects.remove(projectId);
+  archive(@Param("projectId") projectId: string) {
+    return this.projects.archive(projectId);
+  }
+
+  @Post("projects/:projectId/restore")
+  @HttpCode(200)
+  @UseGuards(ProjectAccessGuard)
+  @ProjectRoles("ADMIN")
+  restore(@Param("projectId") projectId: string) {
+    return this.projects.restore(projectId);
   }
 
   @Get("projects/:projectId/members")

@@ -80,6 +80,7 @@ model Project {
   key       String
   description String?
   workspaceId String
+  archivedAt DateTime? // archive instead of delete: issues own activity history
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -90,7 +91,7 @@ model Project {
   counter   ProjectCounter?
 
   @@unique([workspaceId, key])
-  @@index([workspaceId])
+  @@index([workspaceId, archivedAt])
 }
 
 model ProjectMember {
