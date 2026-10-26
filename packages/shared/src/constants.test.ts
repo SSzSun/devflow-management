@@ -1,5 +1,11 @@
 import { expect, test } from "bun:test";
-import { ISSUE_STATUSES, canTransition, hasWorkspaceRole, isIssueSortField } from "./constants.js";
+import {
+  ISSUE_STATUSES,
+  canTransition,
+  hasProjectRole,
+  hasWorkspaceRole,
+  isIssueSortField,
+} from "./constants.js";
 
 test("only the five spec transitions are allowed", () => {
   const allowed = ISSUE_STATUSES.flatMap((from) =>
@@ -25,4 +31,10 @@ test("higher workspace roles satisfy lower requirements", () => {
   expect(hasWorkspaceRole("OWNER", "ADMIN")).toBe(true);
   expect(hasWorkspaceRole("ADMIN", "ADMIN")).toBe(true);
   expect(hasWorkspaceRole("MEMBER", "ADMIN")).toBe(false);
+});
+
+test("higher project roles satisfy lower requirements", () => {
+  expect(hasProjectRole("ADMIN", "MEMBER")).toBe(true);
+  expect(hasProjectRole("VIEWER", "MEMBER")).toBe(false);
+  expect(hasProjectRole("VIEWER", "VIEWER")).toBe(true);
 });

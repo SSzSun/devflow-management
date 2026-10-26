@@ -47,3 +47,14 @@ export const WORKSPACE_ROLE_RANK: Readonly<Record<WorkspaceRole, number>> = {
 export function hasWorkspaceRole(role: WorkspaceRole, required: WorkspaceRole): boolean {
   return WORKSPACE_ROLE_RANK[role] >= WORKSPACE_ROLE_RANK[required];
 }
+
+/** Higher rank satisfies lower requirements (@ProjectRoles("MEMBER") also admits ADMIN). */
+export const PROJECT_ROLE_RANK: Readonly<Record<ProjectRole, number>> = {
+  ADMIN: 3,
+  MEMBER: 2,
+  VIEWER: 1,
+};
+
+export function hasProjectRole(role: ProjectRole, required: ProjectRole): boolean {
+  return PROJECT_ROLE_RANK[role] >= PROJECT_ROLE_RANK[required];
+}
