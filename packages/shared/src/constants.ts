@@ -32,3 +32,18 @@ export type IssueSortField = (typeof ISSUE_SORT_FIELDS)[number];
 export function isIssueSortField(v: string): v is IssueSortField {
   return (ISSUE_SORT_FIELDS as readonly string[]).includes(v);
 }
+
+/** Roles an admin may grant — OWNER is never assignable (no ownership transfer in the MVP). */
+export const ASSIGNABLE_WORKSPACE_ROLES = ["ADMIN", "MEMBER"] as const;
+export type AssignableWorkspaceRole = (typeof ASSIGNABLE_WORKSPACE_ROLES)[number];
+
+/** Higher rank satisfies lower requirements (@Roles("ADMIN") also admits OWNER). */
+export const WORKSPACE_ROLE_RANK: Readonly<Record<WorkspaceRole, number>> = {
+  OWNER: 3,
+  ADMIN: 2,
+  MEMBER: 1,
+};
+
+export function hasWorkspaceRole(role: WorkspaceRole, required: WorkspaceRole): boolean {
+  return WORKSPACE_ROLE_RANK[role] >= WORKSPACE_ROLE_RANK[required];
+}

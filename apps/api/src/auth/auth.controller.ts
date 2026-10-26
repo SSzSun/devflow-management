@@ -10,13 +10,11 @@ import { randomBytes } from "node:crypto";
 import { AuthService, SESSION_COOKIES, SessionTokens } from "./auth.service";
 import { PrismaService } from "../prisma.service";
 import { JwtAuthGuard, type AuthedRequest } from "./jwt-auth.guard";
-import { CsrfGuard } from "./csrf.guard";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 
 @Controller("auth")
 @ApiTags("auth")
-@UseGuards(CsrfGuard)
 export class AuthController {
   constructor(
     private readonly auth: AuthService,

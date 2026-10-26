@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { ISSUE_STATUSES, canTransition, isIssueSortField } from "./constants.js";
+import { ISSUE_STATUSES, canTransition, hasWorkspaceRole, isIssueSortField } from "./constants.js";
 
 test("only the five spec transitions are allowed", () => {
   const allowed = ISSUE_STATUSES.flatMap((from) =>
@@ -19,4 +19,10 @@ test("only the five spec transitions are allowed", () => {
 test("sort allowlist rejects arbitrary input", () => {
   expect(isIssueSortField("createdAt")).toBe(true);
   expect(isIssueSortField("createdAt; DROP TABLE issues")).toBe(false);
+});
+
+test("higher workspace roles satisfy lower requirements", () => {
+  expect(hasWorkspaceRole("OWNER", "ADMIN")).toBe(true);
+  expect(hasWorkspaceRole("ADMIN", "ADMIN")).toBe(true);
+  expect(hasWorkspaceRole("MEMBER", "ADMIN")).toBe(false);
 });
