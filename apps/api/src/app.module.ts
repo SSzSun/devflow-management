@@ -7,6 +7,8 @@ import { CsrfGuard } from "./auth/csrf.guard";
 import { WorkspacesModule } from "./workspaces/workspaces.module";
 import { ProjectsModule } from "./projects/projects.module";
 import { IssuesModule } from "./issues/issues.module";
+import { CommentsModule } from "./comments/comments.module";
+import { LabelsModule } from "./labels/labels.module";
 import { AuthModule } from "./auth/auth.module";
 import { HealthController } from "./health.controller";
 
@@ -19,6 +21,8 @@ import { HealthController } from "./health.controller";
     WorkspacesModule,
     ProjectsModule,
     IssuesModule,
+    CommentsModule,
+    LabelsModule,
   ],
   controllers: [HealthController],
   providers: [

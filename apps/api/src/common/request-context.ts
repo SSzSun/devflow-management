@@ -19,3 +19,9 @@ export function requireProject(req: ProjectRequest): { projectId: string } {
   if (!req.projectId) throw new UnauthorizedException("Authentication required");
   return { projectId: req.projectId };
 }
+
+/** IssueAccessGuard / CommentAccessGuard have already resolved the effective project role. */
+export function requireProjectRole(req: ProjectRequest): NonNullable<ProjectRequest["projectRole"]> {
+  if (!req.projectRole) throw new UnauthorizedException("Authentication required");
+  return req.projectRole;
+}
