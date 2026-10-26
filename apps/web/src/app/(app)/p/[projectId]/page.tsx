@@ -106,6 +106,9 @@ export default function ProjectPage() {
     }
   }
 
+  // The issues query 404s alongside the project one, so one early return keeps the alert single.
+  if (project.isError) return <ErrorNotice error={project.error} />;
+
   const meta = issues.data?.meta;
   const total = meta?.total ?? 0;
 
@@ -136,7 +139,6 @@ export default function ProjectPage() {
         }
       />
 
-      {project.isError && <ErrorNotice error={project.error} />}
       {archived && (
         <p className="mb-4 rounded-[var(--radius-input)] bg-bg-muted px-3.5 py-2.5 text-sm text-text-muted">
           This project is archived. Issues are read-only until an admin restores it.
@@ -196,7 +198,7 @@ export default function ProjectPage() {
                 {labels.data?.map((l) => (
                   <label
                     key={l.id}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-chip)] border border-border px-3 text-sm"
+                    className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-chip)] border border-border px-3 text-sm"
                   >
                     <input type="checkbox" name="labelIds" value={l.id} className="size-4" />
                     <span aria-hidden="true" className="size-2 rounded-full" style={{ backgroundColor: l.color }} />

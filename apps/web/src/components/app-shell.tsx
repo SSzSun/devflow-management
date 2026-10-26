@@ -61,7 +61,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <LayoutDashboard className="size-5" aria-hidden="true" />
           </button>
 
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/" className="flex min-h-[44px] items-center gap-2.5">
             <span className="flex size-9 items-center justify-center rounded-[12px] bg-accent text-accent-text-on">
               <CircleCheck className="size-5" aria-hidden="true" />
             </span>
@@ -85,7 +85,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1280px] gap-6 px-4 py-6 md:px-6">
+      {/* Stack on mobile so the open drawer pushes content down, not off-screen; side-by-side only from lg. */}
+      <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-4 py-6 md:px-6 lg:flex-row">
         <nav
           id="app-nav"
           aria-label="Workspaces and projects"
@@ -101,7 +102,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <Link
                       href={`/w/${w.id}`}
                       aria-current={w.id === workspaceId ? "page" : undefined}
-                      className={`flex min-h-11 items-center justify-between gap-2 rounded-[var(--radius-input)] px-2.5 text-sm transition-colors hover:bg-bg-muted ${
+                      className={`flex min-h-[44px] items-center justify-between gap-2 rounded-[var(--radius-input)] px-2.5 text-sm transition-colors hover:bg-bg-muted ${
                         w.id === workspaceId ? "bg-accent-soft font-medium text-accent" : ""
                       }`}
                     >
@@ -116,7 +117,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               )}
               <Link
                 href="/"
-                className="mt-2 flex min-h-11 items-center gap-2 rounded-[var(--radius-input)] px-2.5 text-sm font-medium text-link hover:bg-bg-muted"
+                className="mt-2 flex min-h-[44px] items-center gap-2 rounded-[var(--radius-input)] px-2.5 text-sm font-medium text-link hover:bg-bg-muted"
               >
                 <Plus className="size-4" aria-hidden="true" />
                 New workspace
@@ -136,7 +137,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <Link
                         href={`/p/${p.id}`}
                         aria-current={p.id === projectId ? "page" : undefined}
-                        className={`flex min-h-11 items-center gap-2 rounded-[var(--radius-input)] px-2.5 text-sm transition-colors hover:bg-bg-muted ${
+                        className={`flex min-h-[44px] items-center gap-2 rounded-[var(--radius-input)] px-2.5 text-sm transition-colors hover:bg-bg-muted ${
                           p.id === projectId ? "bg-accent-soft font-medium text-accent" : ""
                         }`}
                       >

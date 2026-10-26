@@ -11,12 +11,12 @@
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
   --color-text: #1d1d1f;
-  --color-text-muted: #6e6e73;
+  --color-text-muted: #68686d;
   --color-border: #e5e5e7;
-  --color-accent: #8658cc;
-  --color-accent-hover: #754bb8;
+  --color-accent: #7d4ec6;
+  --color-accent-hover: #6b3fb3;
   --color-accent-text-on: #ffffff;
-  --color-accent-soft: #f3eefb;
+  --color-accent-soft: #f1ebfa;
   --color-link: #0062c4;
   --color-danger: #b42318;
   --color-danger-bg: #fdecea;
@@ -38,6 +38,10 @@
   --color-priority-high-bg: #fdf3e3;
   --color-priority-urgent-fg: #b42318;
   --color-priority-urgent-bg: #fdecea;
+
+  /* Card elevation as a token: a black shadow is invisible on a dark surface. */
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 4px 20px rgba(0, 0, 0, 0.08);
 
   --radius-card: 24px;
   --radius-button: 12px;
@@ -79,6 +83,9 @@
   --color-priority-high-bg: #33270f;
   --color-priority-urgent-fg: #ff8a80;
   --color-priority-urgent-bg: #3a1714;
+
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 :root {

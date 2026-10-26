@@ -4,10 +4,10 @@ import type { IssuePriority, IssueStatus } from "@devflow/shared";
 
 /** Shared field styling: label above, 1px border, 2px accent focus ring (design.md). */
 export const fieldClass =
-  "w-full rounded-[var(--radius-input)] border border-border bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-text-muted/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:opacity-60";
+  "w-full min-h-[44px] rounded-[var(--radius-input)] border border-border bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-text-muted/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:opacity-60";
 
 export const buttonBase =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-button)] px-4 text-sm font-semibold transition-all disabled:opacity-60 active:translate-y-px";
+  "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[var(--radius-button)] px-4 text-sm font-semibold transition-all disabled:opacity-60 active:translate-y-px";
 
 type ButtonVariant = "primary" | "ghost" | "danger";
 
@@ -24,7 +24,7 @@ export function buttonClass(variant: ButtonVariant = "primary", extra = ""): str
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ${className}`}
+      className={`rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)] ${className}`}
     >
       {children}
     </div>

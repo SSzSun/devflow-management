@@ -150,7 +150,7 @@ export default function IssuePage() {
 
   return (
     <>
-      <Link href={`/p/${projectId}`} className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-link">
+      <Link href={`/p/${projectId}`} className="mb-4 inline-flex min-h-[44px] items-center gap-2 text-sm text-link">
         <ArrowLeft className="size-4" aria-hidden="true" />
         Back to {data.project.name}
       </Link>
@@ -253,7 +253,7 @@ export default function IssuePage() {
                     {labels.data?.map((l) => (
                       <label
                         key={l.id}
-                        className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-chip)] border border-border px-3 text-sm"
+                        className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-chip)] border border-border px-3 text-sm"
                       >
                         <input
                           type="checkbox"
@@ -345,7 +345,7 @@ export default function IssuePage() {
                               setEditingComment(c.id);
                               setDraft(c.body);
                             }}
-                            className="min-h-11 text-xs font-medium text-link"
+                            className="min-h-[44px] text-xs font-medium text-link"
                           >
                             Edit
                           </button>
@@ -355,7 +355,7 @@ export default function IssuePage() {
                               if (window.confirm("Delete this comment?"))
                                 void run(() => removeComment.mutateAsync(c.id), "Could not delete the comment");
                             }}
-                            className="min-h-11 text-xs font-medium text-danger"
+                            className="min-h-[44px] text-xs font-medium text-danger"
                           >
                             Delete
                           </button>

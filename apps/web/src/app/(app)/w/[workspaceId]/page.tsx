@@ -146,7 +146,7 @@ export default function WorkspacePage() {
           <Link
             key={p.id}
             href={`/p/${p.id}`}
-            className="group rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all hover:border-accent/40"
+            className="group rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)] transition-all hover:border-accent/40"
           >
             <div className="flex items-center gap-2">
               <span className="rounded-md bg-bg-muted px-1.5 py-0.5 font-mono text-xs text-text-muted">{p.key}</span>

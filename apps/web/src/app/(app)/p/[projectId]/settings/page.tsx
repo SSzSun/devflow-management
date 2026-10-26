@@ -94,7 +94,7 @@ export default function ProjectSettingsPage() {
 
   return (
     <>
-      <Link href={`/p/${projectId}`} className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-link">
+      <Link href={`/p/${projectId}`} className="mb-4 inline-flex min-h-[44px] items-center gap-2 text-sm text-link">
         <ArrowLeft className="size-4" aria-hidden="true" />
         Back to project
       </Link>

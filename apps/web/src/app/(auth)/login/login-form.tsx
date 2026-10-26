@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CircleCheck } from "lucide-react";
 import { useLogin, useRegister } from "@/lib/api";
+import { buttonClass, fieldClass as field } from "@/components/ui";
 
 type Mode = "login" | "register";
 
@@ -34,19 +35,16 @@ export function LoginForm() {
     }
   }
 
-  const field =
-    "w-full rounded-[var(--radius-input)] border border-border bg-surface px-3.5 py-2.5 text-sm text-text placeholder:text-text-muted/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
-
   return (
     <div className="w-full max-w-sm">
-      <div className="mb-8 flex items-center gap-2.5">
+      <div className="mb-8 flex min-h-[44px] items-center gap-2.5">
         <span className="flex size-10 items-center justify-center rounded-[14px] bg-accent text-accent-text-on">
           <CircleCheck className="size-5" aria-hidden="true" />
         </span>
         <span className="text-xl font-bold tracking-tight">DevFlow</span>
       </div>
 
-      <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] md:p-8">
+      <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-[var(--shadow-card)] md:p-8">
         <h1 className="text-xl font-bold tracking-tight">
           {mode === "login" ? "Sign in" : "Create your account"}
         </h1>
@@ -115,7 +113,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-[var(--radius-button)] bg-accent px-4 py-2.5 text-sm font-semibold text-accent-text-on transition-all hover:bg-accent-hover disabled:opacity-60 active:translate-y-px"
+            className={buttonClass("primary", "w-full")}
           >
             {pending ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
           </button>
@@ -129,7 +127,7 @@ export function LoginForm() {
               setMode(mode === "login" ? "register" : "login");
               setError("");
             }}
-            className="font-medium text-link hover:underline"
+            className="inline-flex min-h-[44px] items-center font-medium text-link hover:underline"
           >
             {mode === "login" ? "Create one" : "Sign in"}
           </button>

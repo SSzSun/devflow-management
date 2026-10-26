@@ -52,6 +52,9 @@ export default function BoardPage() {
     }
   }
 
+  // The issues query 404s alongside the project one, so one early return keeps the alert single.
+  if (project.isError) return <ErrorNotice error={project.error} />;
+
   return (
     <>
       <PageHeading
@@ -65,7 +68,6 @@ export default function BoardPage() {
         }
       />
 
-      {project.isError && <ErrorNotice error={project.error} />}
       {error && (
         <div className="mb-4">
           <ErrorNotice error={error} />
@@ -116,7 +118,7 @@ export default function BoardPage() {
                         draggable={!readOnly}
                         onDragStart={() => setDragging(issue.id)}
                         onDragEnd={() => setDragging(null)}
-                        className={`rounded-[var(--radius-input)] border border-border bg-surface p-3 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ${
+                        className={`rounded-[var(--radius-input)] border border-border bg-surface p-3 shadow-[var(--shadow-card)] ${
                           dragging === issue.id ? "opacity-60" : ""
                         }`}
                       >
@@ -130,7 +132,7 @@ export default function BoardPage() {
                             </p>
                             <Link
                               href={`/p/${projectId}/i/${issue.id}`}
-                              className="mt-0.5 block text-sm font-medium hover:text-accent"
+                              className="mt-0.5 block min-h-[44px] text-sm font-medium hover:text-accent"
                             >
                               {issue.title}
                             </Link>
@@ -149,7 +151,7 @@ export default function BoardPage() {
                                 disabled={move.isPending}
                                 aria-label={`Move ${project.data?.key}-${issue.number} to ${statusLabel(next)}`}
                                 onClick={() => void onMove(issue, next)}
-                                className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-button)] px-2 text-xs font-medium text-link transition-colors hover:bg-bg-muted disabled:opacity-60"
+                                className="inline-flex min-h-[44px] items-center gap-1 rounded-[var(--radius-button)] px-2 text-xs font-medium text-link transition-colors hover:bg-bg-muted disabled:opacity-60"
                               >
                                 <MoveRight className="size-3.5" aria-hidden="true" />
                                 {statusLabel(next)}

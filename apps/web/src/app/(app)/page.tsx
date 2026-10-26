@@ -112,7 +112,7 @@ export default function HomePage() {
           <Link
             key={w.id}
             href={`/w/${w.id}`}
-            className="group rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all hover:border-accent/40 hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)]"
+            className="group rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)] transition-all hover:border-accent/40 hover:shadow-[var(--shadow-card-hover)]"
           >
             <div className="flex items-start justify-between gap-3">
               <h2 className="truncate text-base font-semibold group-hover:text-accent">{w.name}</h2>
