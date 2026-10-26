@@ -6,6 +6,7 @@ import { PrismaModule } from "./prisma.module";
 import { CsrfGuard } from "./auth/csrf.guard";
 import { WorkspacesModule } from "./workspaces/workspaces.module";
 import { ProjectsModule } from "./projects/projects.module";
+import { IssuesModule } from "./issues/issues.module";
 import { AuthModule } from "./auth/auth.module";
 import { HealthController } from "./health.controller";
 
@@ -17,6 +18,7 @@ import { HealthController } from "./health.controller";
     AuthModule,
     WorkspacesModule,
     ProjectsModule,
+    IssuesModule,
   ],
   controllers: [HealthController],
   providers: [

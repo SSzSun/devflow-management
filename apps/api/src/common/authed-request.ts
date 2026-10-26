@@ -11,3 +11,7 @@ export interface ProjectRequest extends WorkspaceRequest {
   /** Workspace admins inherit project ADMIN; others get their ProjectMember role. */
   projectRole?: ProjectRole;
 }
+
+export interface IssueRequest extends ProjectRequest {
+  issueId?: string;
+}
