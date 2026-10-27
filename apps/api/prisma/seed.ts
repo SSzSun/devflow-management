@@ -75,6 +75,9 @@ async function main() {
           { userId: ownerId, role: "OWNER" },
           { userId: adminId, role: "ADMIN" },
           { userId: memberId, role: "MEMBER" },
+          // Without a workspace row the viewer cannot resolve the project at
+          // all: project access starts from a workspace membership.
+          { userId: viewerId, role: "MEMBER" },
         ],
       },
     },
@@ -120,6 +123,11 @@ async function main() {
       },
     });
   }
+
+  // Every demo account must be reachable: project guards start from a workspace
+  // membership, so a user without one would see an empty app.
+  const memberCount = await prisma.workspaceMember.count({ where: { workspaceId: workspace.id } });
+  if (memberCount !== users.length) throw new Error("demo users are missing a workspace membership");
 
   console.log(`Seeded workspace "${workspace.name}" (${issues.length} issues)`);
   console.log(`Sign in with ${users[0].email} / ${PASSWORD}`);

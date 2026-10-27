@@ -1,4 +1,7 @@
-# Local PostgreSQL for development. Credentials are dev placeholders, not secrets.
+# Dev database (default `docker compose up -d db`) plus a production-style stack
+# from the same file: `docker compose up --build`.
+# Credentials here are local placeholders. A real deployment sets them in its
+# environment; never commit real secrets.
 services:
   db:
     image: postgres:18
@@ -14,6 +17,48 @@ services:
       test: ["CMD-SHELL", "pg_isready -U devflow -d devflow"]
       interval: 5s
       retries: 10
+
+  # Build with the repo root as context: the Bun workspace links @devflow/shared.
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    # Migrate on boot so a fresh `docker compose up` has a schema; Bun ships in
+    # the image for exactly this.
+    command: sh -c "bunx --no-install prisma migrate deploy && node dist/main.js"
+    environment:
+      DATABASE_URL: postgresql://devflow:devflow_local@db:5432/devflow
+      # Override in the shell or a .env file; this default is a placeholder.
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-only-access-secret}
+      NODE_ENV: production
+      PORT: 4000
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/api/v1/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      # next.config.ts bakes the /api rewrite at build time, not at boot.
+      args:
+        API_URL: http://api:4000
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   devflow-db:

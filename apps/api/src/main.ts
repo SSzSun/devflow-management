@@ -27,6 +27,11 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle("DevFlow API")
+    .setDescription(
+      "Issue tracking and workflow management. Sessions are HttpOnly cookies: " +
+        "GET /api/v1/auth/csrf, then POST /api/v1/auth/login, then send " +
+        "X-CSRF-Token (copied from the csrf_token cookie) on every mutation.",
+    )
     .setVersion("0.1.0")
     .addCookieAuth("access_token")
     .build();

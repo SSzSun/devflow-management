@@ -1,0 +1,20 @@
+# Build context is the repo root; nothing here belongs in an image.
+.git
+.github
+node_modules
+**/node_modules
+**/.next
+**/dist
+**/*.tsbuildinfo
+apps/api/src/generated
+coverage
+docs
+*.log
+
+# Never bake environment files into an image. Both spellings: a bare pattern is
+# root-relative in some Docker versions, `**/` is unambiguous.
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example

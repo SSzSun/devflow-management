@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: devflow
+          POSTGRES_PASSWORD: devflow_local
+          POSTGRES_DB: devflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U devflow -d devflow"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://devflow:devflow_local@localhost:5432/devflow
+      # Test-only value; nothing here is a real secret.
+      JWT_ACCESS_SECRET: ci-access-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.1
+      - run: bun install --frozen-lockfile
+      # The generated client is gitignored, and integration tests hit the DB.
+      - run: bunx prisma generate
+        working-directory: apps/api
+      - run: bunx prisma migrate deploy
+        working-directory: apps/api
+      - run: bun run lint
+      - run: bun run typecheck
+      - run: bun run test
+      - run: bun run build
