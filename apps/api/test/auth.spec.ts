@@ -1,4 +1,5 @@
 import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { createHash } from "node:crypto";
 import { Test } from "@nestjs/testing";
 import cookieParser from "cookie-parser";
 import request from "supertest";
@@ -11,6 +12,17 @@ describe("auth (integration)", () => {
   let prisma: PrismaService;
   const email = `jest-${Date.now()}@devflow.test`;
   const csrf = "test-csrf";
+
+/** Pulls one cookie's value out of a supertest Set-Cookie list. */
+function cookieValue(setCookie: string[] | undefined, name: string): string {
+  const raw = setCookie?.find((c) => c.startsWith(`${name}=`))?.split(";")[0]?.slice(name.length + 1);
+  if (!raw) throw new Error(`missing ${name} cookie`);
+  return raw;
+}
+
+function sha256(v: string): string {
+  return createHash("sha256").update(v).digest("hex");
+}
 
   beforeAll(async () => {
     const mod = await Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -71,6 +83,50 @@ describe("auth (integration)", () => {
 
   it("me without a session is 401", async () => {
     await request(app.getHttpServer()).get("/api/v1/auth/me").expect(401);
+  });
+
+  it("normalizes email case on register and login", async () => {
+    const mixed = `Mixed-${Date.now()}@DevFlow.test`;
+    const res = await post("register").send({ email: mixed, name: "Case", password: "password123" }).expect(201);
+    expect((res.body as { csrfToken: string }).csrfToken).toBeTruthy();
+    const stored = await prisma.user.findUniqueOrThrow({ where: { email: mixed.toLowerCase() } });
+    expect(stored.email).toBe(stored.email.toLowerCase());
+    await post("login").send({ email: mixed.toUpperCase(), password: "password123" }).expect(200);
+    await prisma.user.delete({ where: { id: stored.id } });
+  });
+
+  it("rejects a replayed refresh token", async () => {
+    const reg = await post("register")
+      .send({ email: `rotate-${Date.now()}@devflow.test`, name: "Rotate", password: "password123" })
+      .expect(201);
+    const token = cookieValue(reg.get("Set-Cookie"), "refresh_token");
+    const replay = () =>
+      request(app.getHttpServer())
+        .post("/api/v1/auth/refresh")
+        .set("X-CSRF-Token", csrf)
+        .set("Cookie", `csrf_token=${csrf}; refresh_token=${token}`);
+
+    await replay().expect(200);
+    await replay().expect(401);
+    const user = await prisma.refreshToken.findUniqueOrThrow({ where: { tokenHash: sha256(token) } });
+    await prisma.user.delete({ where: { id: user.userId } });
+  });
+
+  it("logout revokes the session even without a valid access token", async () => {
+    const reg = await post("register")
+      .send({ email: `logout-${Date.now()}@devflow.test`, name: "Logout", password: "password123" })
+      .expect(201);
+    const token = cookieValue(reg.get("Set-Cookie"), "refresh_token");
+    const withCookies = (path: string) =>
+      request(app.getHttpServer())
+        .post(`/api/v1/auth/${path}`)
+        .set("X-CSRF-Token", csrf)
+        .set("Cookie", `csrf_token=${csrf}; refresh_token=${token}`);
+
+    await withCookies("logout").expect(200);
+    await withCookies("refresh").expect(401);
+    const user = await prisma.refreshToken.findUniqueOrThrow({ where: { tokenHash: sha256(token) } });
+    await prisma.user.delete({ where: { id: user.userId } });
   });
 
   // Keep last: it exhausts the per-IP login budget for this app instance.

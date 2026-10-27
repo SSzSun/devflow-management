@@ -1,8 +1,9 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { CanActivate, ConflictException, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { hasProjectRole, type ProjectRole } from "@devflow/shared";
 import { PrismaService } from "../prisma.service";
 import { PROJECT_ROLES_KEY } from "../common/project-roles.decorator";
+import { ALLOW_ON_ARCHIVED_KEY } from "../common/allow-on-archived.decorator";
 import { resolveProjectAccess } from "../common/project-access";
 import type { ProjectRequest } from "../common/authed-request";
 
@@ -48,6 +49,14 @@ export abstract class ProjectScopedGuard implements CanActivate {
     ]);
     if (required && !hasProjectRole(access.projectRole, required)) {
       throw new ForbiddenException("Insufficient project role");
+    }
+    // Archived projects are read-only; admin routes opt out with @AllowOnArchived().
+    const allowArchived = this.reflector.getAllAndOverride<boolean | undefined>(ALLOW_ON_ARCHIVED_KEY, [
+      ctx.getHandler(),
+      ctx.getClass(),
+    ]);
+    if (access.archived && req.method !== "GET" && !allowArchived) {
+      throw new ConflictException("Project is archived");
     }
     return true;
   }

@@ -94,7 +94,8 @@ export default function IssuePage() {
   const role = project.data?.role;
   const canWrite = role ? hasProjectRole(role, "MEMBER") : false;
   const isAdmin = role ? hasProjectRole(role, "ADMIN") : false;
-  const readOnly = Boolean(project.data?.archivedAt) || !canWrite;
+  const archived = Boolean(project.data?.archivedAt);
+  const readOnly = archived || !canWrite;
 
   const names = new Map(members.data?.map((m) => [m.user.id, m.user.name]) ?? []);
 
@@ -367,24 +368,31 @@ export default function IssuePage() {
               })}
             </ul>
 
-            <form onSubmit={onComment} className="mt-5">
-              <label htmlFor="new-comment" className="mb-1.5 block text-sm font-medium">
-                Add a comment
-              </label>
-              <textarea
-                id="new-comment"
-                rows={3}
-                required
-                maxLength={10000}
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                className={fieldClass}
-                placeholder="Write an update…"
-              />
-              <button type="submit" disabled={addComment.isPending} className={buttonClass("primary", "mt-2")}>
-                {addComment.isPending ? "Posting…" : "Comment"}
-              </button>
-            </form>
+            {/* Archived is read-only: the API rejects the write, so do not offer it. */}
+            {archived ? (
+              <p className="mt-5 rounded-[var(--radius-input)] border border-border bg-bg-muted px-3 py-2 text-sm text-text-muted">
+                This project is archived. Restore it to comment.
+              </p>
+            ) : (
+              <form onSubmit={onComment} className="mt-5">
+                <label htmlFor="new-comment" className="mb-1.5 block text-sm font-medium">
+                  Add a comment
+                </label>
+                <textarea
+                  id="new-comment"
+                  rows={3}
+                  required
+                  maxLength={10000}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  className={fieldClass}
+                  placeholder="Write an update…"
+                />
+                <button type="submit" disabled={addComment.isPending} className={buttonClass("primary", "mt-2")}>
+                  {addComment.isPending ? "Posting…" : "Comment"}
+                </button>
+              </form>
+            )}
           </Card>
         </div>
 

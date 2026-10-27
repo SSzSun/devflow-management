@@ -3,6 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { createHash, randomBytes } from "node:crypto";
 import * as argon2 from "argon2";
 import { PrismaService } from "../prisma.service";
+import { isUniqueViolation } from "../common/prisma-errors";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 
@@ -36,9 +37,13 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials");
     }
     const passwordHash = await argon2.hash(dto.password);
-    const user = await this.prisma.user.create({
-      data: { email: dto.email, name: dto.name, passwordHash },
-    });
+    const user = await this.prisma.user
+      .create({ data: { email: dto.email, name: dto.name, passwordHash } })
+      // Lost a concurrent signup race: same answer as the check above.
+      .catch((e: unknown) => {
+        if (isUniqueViolation(e)) throw new UnauthorizedException("Invalid credentials");
+        throw e;
+      });
     return this.issueSession(user.id);
   }
 
@@ -55,17 +60,19 @@ export class AuthService {
     if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
       throw new UnauthorizedException("Invalid refresh token");
     }
-    // Rotation: revoke old token, issue a fresh pair.
-    await this.prisma.refreshToken.update({
-      where: { id: stored.id },
+    // Rotation must be atomic: a replayed token loses the updateMany race and gets no session.
+    const rotated = await this.prisma.refreshToken.updateMany({
+      where: { id: stored.id, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+    if (rotated.count !== 1) throw new UnauthorizedException("Invalid refresh token");
     return this.issueSession(stored.userId);
   }
 
-  async logout(userId: string, refreshToken: string): Promise<void> {
+  // Keyed by the (secret) token itself, so logout works with an expired access token.
+  async logout(refreshToken: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
-      where: { tokenHash: sha256(refreshToken), userId },
+      where: { tokenHash: sha256(refreshToken), revokedAt: null },
       data: { revokedAt: new Date() },
     });
   }

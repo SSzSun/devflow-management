@@ -76,6 +76,7 @@ describe("issues (integration)", () => {
   afterAll(async () => {
     await prisma.workspace.deleteMany({ where: { slug: { startsWith: "is-test-" } } });
     await prisma.user.deleteMany({ where: { email: { in: emails } } });
+    await prisma.user.deleteMany({ where: { email: { startsWith: "is-gone-" } } });
     await app.close();
   });
 
@@ -127,6 +128,29 @@ describe("issues (integration)", () => {
       await member
         .request("post", `/api/v1/projects/${projectId}/issues`)
         .send({ title: "Bad assignee", assigneeId: outsiderId })
+        .expect(400);
+    });
+
+    it("rejects an assignee whose workspace membership is gone", async () => {
+      // A ProjectMember row can outlive a workspace removal; it must not grant assignability.
+      const gone = new Client(app, uniqueEmail("is-gone"));
+      await gone.register();
+      await owner
+        .request("post", `/api/v1/workspaces/${workspaceId}/members`)
+        .send({ email: gone.address, role: "MEMBER" })
+        .expect(201);
+      await owner
+        .request("post", `/api/v1/projects/${projectId}/members`)
+        .send({ email: gone.address, role: "MEMBER" })
+        .expect(201);
+      const goneId = (await prisma.user.findUniqueOrThrow({ where: { email: gone.address } })).id;
+      await prisma.workspaceMember.delete({
+        where: { workspaceId_userId: { workspaceId, userId: goneId } },
+      });
+
+      await member
+        .request("post", `/api/v1/projects/${projectId}/issues`)
+        .send({ title: "Gone assignee", assigneeId: goneId })
         .expect(400);
     });
 

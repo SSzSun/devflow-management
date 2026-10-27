@@ -5,6 +5,7 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { requireUserId, requireWorkspace } from "../common/request-context";
 import { Roles } from "../common/roles.decorator";
 import { ProjectRoles } from "../common/project-roles.decorator";
+import { AllowOnArchived } from "../common/allow-on-archived.decorator";
 import type { ProjectRequest, WorkspaceRequest } from "../common/authed-request";
 import { WorkspaceGuard } from "../workspaces/workspace.guard";
 import { ProjectsService } from "./projects.service";
@@ -51,6 +52,7 @@ export class ProjectsController {
   @Patch("projects/:projectId")
   @UseGuards(ProjectAccessGuard)
   @ProjectRoles("ADMIN")
+  @AllowOnArchived()
   update(@Param("projectId") projectId: string, @Body() dto: UpdateProjectDto) {
     return this.projects.update(projectId, dto);
   }
@@ -60,6 +62,7 @@ export class ProjectsController {
   @HttpCode(200)
   @UseGuards(ProjectAccessGuard)
   @ProjectRoles("ADMIN")
+  @AllowOnArchived()
   archive(@Param("projectId") projectId: string) {
     return this.projects.archive(projectId);
   }
@@ -68,6 +71,7 @@ export class ProjectsController {
   @HttpCode(200)
   @UseGuards(ProjectAccessGuard)
   @ProjectRoles("ADMIN")
+  @AllowOnArchived()
   restore(@Param("projectId") projectId: string) {
     return this.projects.restore(projectId);
   }
@@ -81,6 +85,7 @@ export class ProjectsController {
   @Post("projects/:projectId/members")
   @UseGuards(ProjectAccessGuard)
   @ProjectRoles("ADMIN")
+  @AllowOnArchived()
   addMember(@Req() req: ProjectRequest, @Param("projectId") projectId: string, @Body() dto: AddProjectMemberDto) {
     const workspaceId = req.workspaceId;
     if (!workspaceId) throw new Error("unreachable: ProjectAccessGuard ran");
@@ -90,6 +95,7 @@ export class ProjectsController {
   @Patch("projects/:projectId/members/:userId")
   @UseGuards(ProjectAccessGuard)
   @ProjectRoles("ADMIN")
+  @AllowOnArchived()
   updateMember(
     @Param("projectId") projectId: string,
     @Param("userId") userId: string,
@@ -102,6 +108,7 @@ export class ProjectsController {
   @HttpCode(200)
   @UseGuards(ProjectAccessGuard)
   @ProjectRoles("ADMIN")
+  @AllowOnArchived()
   removeMember(@Param("projectId") projectId: string, @Param("userId") userId: string) {
     return this.projects.removeMember(projectId, userId);
   }

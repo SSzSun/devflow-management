@@ -169,6 +169,7 @@ model IssueLabel {
   label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
 
   @@id([issueId, labelId])
+  @@index([labelId])
 }
 
 enum IssueStatus {

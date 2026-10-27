@@ -231,4 +231,34 @@ describe("projects (integration)", () => {
       .send({ name: "Reuse", key: "MAIN" })
       .expect(409);
   });
+  it("makes an archived project read-only in the API, not just the UI", async () => {
+    // Restore briefly to seed an issue and a label, then archive again.
+    await owner.request("post", `/api/v1/projects/${projectId}/restore`).expect(200);
+    const issue = await member
+      .request("post", `/api/v1/projects/${projectId}/issues`)
+      .send({ title: "Before archive" })
+      .expect(201);
+    const issueId = issue.body.id as string;
+    const label = await member
+      .request("post", `/api/v1/projects/${projectId}/labels`)
+      .send({ name: "frozen", color: "#123456" })
+      .expect(201);
+    const labelId = label.body.id as string;
+    await owner.request("delete", `/api/v1/projects/${projectId}`).expect(200);
+
+    // Writes through every project- and issue-scoped guard are 409.
+    await member.request("post", `/api/v1/projects/${projectId}/issues`).send({ title: "x" }).expect(409);
+    await member.request("patch", `/api/v1/issues/${issueId}`).send({ title: "x" }).expect(409);
+    await member.request("patch", `/api/v1/issues/${issueId}/status`).send({ status: "IN_PROGRESS" }).expect(409);
+    await member.request("delete", `/api/v1/issues/${issueId}`).expect(409);
+    await member.request("post", `/api/v1/issues/${issueId}/comments`).send({ body: "x" }).expect(409);
+    await member.request("post", `/api/v1/projects/${projectId}/labels`).send({ name: "y", color: "#000000" }).expect(409);
+    await owner.request("patch", `/api/v1/labels/${labelId}`).send({ name: "z" }).expect(409);
+
+    // Reads still work, and admins can still rename and restore.
+    await member.request("get", `/api/v1/issues/${issueId}`).expect(200);
+    await owner.request("patch", `/api/v1/projects/${projectId}`).send({ name: "Main (old)" }).expect(200);
+    await owner.request("post", `/api/v1/projects/${projectId}/restore`).expect(200);
+    await member.request("patch", `/api/v1/issues/${issueId}`).send({ title: "After restore" }).expect(200);
+  });
 });

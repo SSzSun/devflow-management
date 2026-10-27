@@ -1,6 +1,5 @@
 import { Body, Controller, Get, HttpCode, Post, Req, Res, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { JwtService } from "@nestjs/jwt";
 import { Throttle } from "@nestjs/throttler";
 
 // Credential endpoints: 10 attempts per minute per IP to slow brute-forcing.
@@ -19,7 +18,6 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly prisma: PrismaService,
-    private readonly jwt: JwtService,
   ) {}
 
   /** Issues a CSRF token before a session exists, so the first login/register can pass CsrfGuard. */
@@ -61,9 +59,8 @@ export class AuthController {
   @Post("logout")
   @HttpCode(200)
   async logout(@Req() req: AuthedRequest, @Res({ passthrough: true }) res: Response) {
-    const cookies = req.cookies as Record<string, string>;
-    const userId = await this.userIdFromAccess(cookies["access_token"]);
-    if (userId && cookies["refresh_token"]) await this.auth.logout(userId, cookies["refresh_token"]);
+    const refreshToken = (req.cookies as Record<string, string>)[SESSION_COOKIES.refresh];
+    if (refreshToken) await this.auth.logout(refreshToken);
     for (const name of Object.values(SESSION_COOKIES)) res.clearCookie(name, { path: "/" });
     return { success: true };
   }
@@ -78,16 +75,6 @@ export class AuthController {
     });
     if (!user) throw new UnauthorizedException("User not found");
     return user;
-  }
-
-  private async userIdFromAccess(token: string | undefined): Promise<string | undefined> {
-    if (!token) return undefined;
-    try {
-      const payload = await this.jwt.verifyAsync<{ sub: string }>(token, { secret: process.env.JWT_ACCESS_SECRET });
-      return payload.sub;
-    } catch {
-      return undefined;
-    }
   }
 
   private setSession(res: Response, s: SessionTokens) {

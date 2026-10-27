@@ -269,9 +269,10 @@ export class IssuesService {
       }),
     ]);
 
-    // Workspace admins inherit access without a ProjectMember row.
+    // Workspace admins inherit access without a ProjectMember row; a lingering
+    // project row for someone who left the workspace still does not count.
     const isWorkspaceAdmin = workspaceMember?.role === "OWNER" || workspaceMember?.role === "ADMIN";
-    if (!projectMember && !isWorkspaceAdmin) {
+    if (!workspaceMember || (!projectMember && !isWorkspaceAdmin)) {
       throw new BadRequestException("Assignee is not a member of this project");
     }
   }

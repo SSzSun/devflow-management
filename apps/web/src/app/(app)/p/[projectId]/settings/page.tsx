@@ -304,7 +304,7 @@ export default function ProjectSettingsPage() {
                 <span aria-hidden="true" className="size-3 rounded-full" style={{ backgroundColor: l.color }} />
                 <span className="min-w-0 flex-1 truncate text-sm">{l.name}</span>
                 <span className="font-mono text-xs text-text-muted">{l.color}</span>
-                {isAdmin && (
+                {isAdmin && !archived && (
                   <button
                     type="button"
                     aria-label={`Delete label ${l.name}`}
@@ -321,7 +321,9 @@ export default function ProjectSettingsPage() {
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-text-muted">Only project admins can delete labels.</p>
+          <p className="mt-3 text-xs text-text-muted">
+            {archived ? "Archived projects are read-only." : "Only project admins can delete labels."}
+          </p>
         </Card>
 
         {isAdmin && (

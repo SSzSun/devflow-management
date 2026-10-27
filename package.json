@@ -12,6 +12,13 @@
     "dev:web": "bun run --cwd apps/web dev",
     "build": "bun run --cwd packages/shared build && bun run --cwd apps/api build && bun run --cwd apps/web build",
     "test": "bun run --cwd packages/shared build && bun test packages/shared && bun run --cwd apps/api test && bun run --cwd apps/web test",
-    "typecheck": "bun run --cwd packages/shared build && bun run --cwd apps/api typecheck && bun run --cwd apps/web typecheck"
+    "typecheck": "bun run --cwd packages/shared build && bun run --cwd apps/api typecheck && bun run --cwd apps/web typecheck",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "typescript-eslint": "^8.72.1"
   }
 }

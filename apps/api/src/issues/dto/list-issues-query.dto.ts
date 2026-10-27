@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { IsArray, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
+import { ArrayMaxSize, IsArray, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 import {
   ISSUE_PRIORITIES,
   ISSUE_SORT_FIELDS,
@@ -34,11 +34,13 @@ export class ListIssuesQueryDto {
   /** `unassigned` matches issues with no assignee. */
   @IsOptional()
   @IsString()
+  @MaxLength(64)
   assigneeId?: string;
 
   @IsOptional()
   @Transform(csv)
   @IsArray()
+  @ArrayMaxSize(50)
   @IsString({ each: true })
   labelIds?: string[];
 

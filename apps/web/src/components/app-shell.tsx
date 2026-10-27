@@ -30,13 +30,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const workspaces = useWorkspaces();
   const projects = useProjects(workspaceId);
   const [navOpen, setNavOpen] = useState(false);
+  // Route change closes the mobile drawer. Resetting during render is React
+  // 19's supported pattern and costs no extra effect pass.
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
+    setNavOpen(false);
+  }
 
   useEffect(() => {
     if (me.data === null) router.replace("/login");
   }, [me.data, router]);
-
-  // Route change closes the mobile drawer.
-  useEffect(() => setNavOpen(false), [pathname]);
 
   async function onLogout() {
     await logout().catch(() => undefined); // cookies are cleared server-side either way

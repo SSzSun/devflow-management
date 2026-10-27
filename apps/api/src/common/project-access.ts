@@ -6,6 +6,7 @@ export interface EffectiveProjectAccess {
   workspaceId: string;
   workspaceRole: WorkspaceRole;
   projectRole: ProjectRole;
+  archived: boolean;
 }
 
 /**
@@ -28,6 +29,7 @@ export async function resolveProjectAccess(
     select: {
       id: true,
       workspaceId: true,
+      archivedAt: true,
       workspace: { select: { members: { where: { userId }, select: { role: true } } } },
       members: { where: { userId }, select: { role: true } },
     },
@@ -38,11 +40,23 @@ export async function resolveProjectAccess(
   if (!workspaceRole) return null;
 
   if (hasWorkspaceRole(workspaceRole, "ADMIN")) {
-    return { projectId: project.id, workspaceId: project.workspaceId, workspaceRole, projectRole: "ADMIN" };
+    return {
+      projectId: project.id,
+      workspaceId: project.workspaceId,
+      workspaceRole,
+      projectRole: "ADMIN",
+      archived: project.archivedAt !== null,
+    };
   }
 
   const membership = project.members[0]?.role;
   if (!membership) return null;
 
-  return { projectId: project.id, workspaceId: project.workspaceId, workspaceRole, projectRole: membership };
+  return {
+    projectId: project.id,
+    workspaceId: project.workspaceId,
+    workspaceRole,
+    projectRole: membership,
+    archived: project.archivedAt !== null,
+  };
 }
